@@ -35,24 +35,32 @@ class Compiler_c {
 
 const Compiler = new Compiler_c;
 
-const beingWatch = () => {
+const beingWatch = (compconf) => {
     const files = fs.readdirSync(CUR_DIR);
     var correct_files = [];
+
+    correct_files.push(compconf.cflags);
 
     for (let i = 0; files[i]; i++)
     {
         const filename = path.join(CUR_DIR, files[i]);
 
         if (filename.includes(".c"))
+        {
             correct_files.push(filename);
-    }
 
-    for (let i = 0; correct_files[i]; i++)
-    {
-        fs.watchFile(correct_files[i], {interval: 500}, e => {
-            Compiler.CompileFolder(correct_files);
-        });
+            fs.watchFile(correct_files[correct_files.length - 1], {interval: 500}, e => {
+                Compiler.CompileFolder(correct_files);
+            });
+        }
     }
 };
 
-beingWatch();
+fs.readFile("./autoconf.json", (err, data) => {
+    var compconf = "";
+
+    if (!err)
+        compconf = JSON.parse(data);
+
+    beingWatch(compconf);
+})
